@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Calcul du prix final</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        /* CORRECTION DU DÉBORDEMENT */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            max-width: 420px;
+            margin: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        input {
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .buttons button {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        button {
+            background: #2d89ef;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .result {
+            background: #eef3ff;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .details {
+            font-size: 14px;
+            margin-top: 8px;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Calcul du prix final</h2>
+
+    <label>Prix d'adjudication (€)</label>
+    <input type="number" id="prix" placeholder="Ex : 10000" inputmode="numeric">
+
+    <div class="buttons">
+        <button onclick="modifierPrix(-100)">- 100 €</button>
+        <button onclick="modifierPrix(100)">+ 100 €</button>
+    </div>
+
+    <label>Type de tarif</label>
+    <select id="tarif" onchange="calculer()">
+        <option value="standard">Tarif standard</option>
+        <option value="special">Tarif spécial</option>
+    </select>
+
+    <button onclick="calculer()">Calculer</button>
+
+    <div class="result" id="resultat">
+        Prix final : — €
+    </div>
+</div>
+
+<script>
+function modifierPrix(valeur) {
+    let champPrix = document.getElementById("prix");
+    let prixActuel = parseFloat(champPrix.value) || 0;
+    let nouveauPrix = prixActuel + valeur;
+
+    if (nouveauPrix < 0) nouveauPrix = 0;
+
+    champPrix.value = nouveauPrix;
+    calculer();
+}
+
+function calculer() {
+    let prix = parseFloat(document.getElementById("prix").value);
+    let tarif = document.getElementById("tarif").value;
+
+    if (isNaN(prix) || prix <= 0) {
+        document.getElementById("resultat").innerHTML = "Prix final : — €";
+        return;
+    }
+
+    let commission = 0;
+    let frais = 0;
+
+    if (tarif === "standard") {
+        commission = prix * 0.12;
+        frais = 150;
+    } else {
+        commission = prix * 0.1428;
+        frais = 300;
+    }
+
+    let total = prix + commission + frais;
+
+    document.getElementById("resultat").innerHTML =
+        "<strong>Prix final : " + total.toFixed(2) + " €</strong>" +
+        "<div class='details'>Commission : " + commission.toFixed(2) +
+        " €<br>Frais : " + frais + " €</div>";
+}
+</script>
+
+</body>
+</html>
