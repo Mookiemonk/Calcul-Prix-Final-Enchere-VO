@@ -2,14 +2,11 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Calcul du prix final</title>
+    <title>Calculateur Enchères – Enchères VO & Alcopa</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
-        /* CORRECTION DU DÉBORDEMENT */
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             font-family: Arial, sans-serif;
@@ -21,7 +18,7 @@
         .container {
             background: white;
             padding: 20px;
-            max-width: 420px;
+            max-width: 450px;
             margin: auto;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -29,6 +26,13 @@
 
         h2 {
             text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #555;
             margin-bottom: 20px;
         }
 
@@ -84,30 +88,46 @@
 
         .details {
             font-size: 14px;
-            margin-top: 8px;
+            margin-top: 10px;
             color: #444;
+            text-align: left;
+        }
+
+        .info {
+            font-size: 12px;
+            color: #777;
+            margin-top: 8px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Calcul du prix final</h2>
-    <h2>encheres-vo.com</h2>
+    <h2>Calculateur d’enchères</h2>
+    <div class="subtitle">Enchères-VO & Alcopa</div>
+
+    <label>Plateforme</label>
+    <select id="plateforme" onchange="changerPlateforme()">
+        <option value="encheresvo">Enchères-VO</option>
+        <option value="alcopa">Alcopa – Particulier VP</option>
+    </select>
 
     <label>Prix d'adjudication (€)</label>
-    <input type="number" id="prix" placeholder="Ex : 10000" inputmode="numeric">
+    <input type="number" id="prix" placeholder="Ex : 10 000">
 
     <div class="buttons">
         <button onclick="modifierPrix(-100)">- 100 €</button>
         <button onclick="modifierPrix(100)">+ 100 €</button>
     </div>
 
-    <label>Type de tarif</label>
-    <select id="tarif" onchange="calculer()">
-        <option value="standard">Tarif standard</option>
-        <option value="special">Tarif spécial</option>
-    </select>
+    <!-- Options Enchères-VO -->
+    <div id="optionsEncheresVO">
+        <label>Type de tarif</label>
+        <select id="tarifVO">
+            <option value="standard">Tarif standard</option>
+            <option value="special">Tarif spécial</option>
+        </select>
+    </div>
 
     <button onclick="calculer()">Calculer</button>
 
@@ -117,20 +137,25 @@
 </div>
 
 <script>
+function changerPlateforme() {
+    const plateforme = document.getElementById("plateforme").value;
+    document.getElementById("optionsEncheresVO").style.display =
+        plateforme === "encheresvo" ? "block" : "none";
+    calculer();
+}
+
 function modifierPrix(valeur) {
-    let champPrix = document.getElementById("prix");
-    let prixActuel = parseFloat(champPrix.value) || 0;
-    let nouveauPrix = prixActuel + valeur;
-
-    if (nouveauPrix < 0) nouveauPrix = 0;
-
-    champPrix.value = nouveauPrix;
+    let champ = document.getElementById("prix");
+    let prix = parseFloat(champ.value) || 0;
+    prix += valeur;
+    if (prix < 0) prix = 0;
+    champ.value = prix;
     calculer();
 }
 
 function calculer() {
     let prix = parseFloat(document.getElementById("prix").value);
-    let tarif = document.getElementById("tarif").value;
+    let plateforme = document.getElementById("plateforme").value;
 
     if (isNaN(prix) || prix <= 0) {
         document.getElementById("resultat").innerHTML = "Prix final : — €";
@@ -139,24 +164,51 @@ function calculer() {
 
     let commission = 0;
     let frais = 0;
+    let details = "";
 
-    if (tarif === "standard") {
-        commission = prix * 0.12;
-        frais = 150;
-    } else {
-        commission = prix * 0.1428;
-        frais = 300;
+    /* ===== ENCHERES-VO ===== */
+    if (plateforme === "encheresvo") {
+        let tarif = document.getElementById("tarifVO").value;
+
+        if (tarif === "standard") {
+            commission = prix * 0.12;
+            frais = 150;
+        } else {
+            commission = prix * 0.1428;
+            frais = 300;
+        }
+
+        details =
+            "Commission : " + commission.toFixed(2) + " €<br>" +
+            "Frais fixes : " + frais.toFixed(2) + " €";
+
+    }
+
+    /* ===== ALCOPA PARTICULIER VP ===== */
+    if (plateforme === "alcopa") {
+        commission = prix * 0.144;
+
+        if (commission < 360) {
+            commission = 360;
+        }
+
+        frais = 140;
+
+        details =
+            "Frais d’adjudication (14,40% TTC – min 360€) : " + commission.toFixed(2) + " €<br>" +
+            "Frais de vente France : " + frais.toFixed(2) + " €<br>" +
+            "<span class='info'>Acompte 600 € (empreinte CB, non inclus)</span>";
     }
 
     let total = prix + commission + frais;
 
     document.getElementById("resultat").innerHTML =
         "<strong>Prix final : " + total.toFixed(2) + " €</strong>" +
-        "<div class='details'>Commission : " + commission.toFixed(2) +
-        " €<br>Frais : " + frais + " €</div>";
+        "<div class='details'>" + details + "</div>";
 }
+
+changerPlateforme();
 </script>
 
 </body>
 </html>
-
